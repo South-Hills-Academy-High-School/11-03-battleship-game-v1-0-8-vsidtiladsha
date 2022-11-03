@@ -3,6 +3,7 @@ namespace SpriteKind {
     export const Boat0 = SpriteKind.create()
     export const Boat1 = SpriteKind.create()
     export const Boat2 = SpriteKind.create()
+    export const cpuit = SpriteKind.create()
 }
 /**
  * TODO:
@@ -71,8 +72,11 @@ function makeBoatVisible (boatArray: Sprite[]) {
     }
 }
 function cpuMove () {
-    cpuHitOrMiss()
     game.splash("CPU Move")
+    if (cpuHitorMiss() && searchSEW()) {
+        isHitOrMiss(boatSpriteArrayP1, hitOrMissP2)
+        switchPlayer()
+    }
     grid.place(cursor, tiles.getTileLocation(randint(0, 9), randint(0, 6)))
     while (isAttackingTwice(hitOrMissP2)) {
         grid.place(cursor, tiles.getTileLocation(randint(0, 9), randint(0, 6)))
@@ -176,6 +180,32 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     grid.move(cursor, 1, 0)
     grid.place(shadowCursor, tiles.getTileLocation(grid.spriteCol(cursor) + -1, grid.spriteRow(cursor)))
 })
+function cpuHitorMiss () {
+    let list: Sprite[] = []
+    mySprite = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.cpuit)
+    game.splash("Row" + cpuLastHitRow + "Col" + cpuLastHitCol)
+    if (list[list.length - 1].kind() == mySprite.kind()) {
+        return 1
+    }
+    return 0
+}
 function moveBoat (boatArray: any[], boatRotateArray: string[]) {
     makeBoatVisible(boatArray)
     if (grid.spriteRow(cursor) >= 8 - boatArray.length && boatRotateArray[currentBoat] == "up") {
@@ -214,29 +244,50 @@ function isHitOrMiss (enemyBoats: Sprite[][], hitOrMissPX: Sprite[]) {
     for (let index = 0; index <= 2; index++) {
         for (let currentBoatSprite of enemyBoats[index]) {
             if (grid.spriteCol(currentBoatSprite) == grid.spriteCol(cursor) && grid.spriteRow(currentBoatSprite) == grid.spriteRow(cursor)) {
-                boomSprite = sprites.create(img`
-                    . . . . 2 2 2 2 2 2 2 2 . . . . 
-                    . . . 2 4 4 4 5 5 4 4 4 2 2 2 . 
-                    . 2 2 5 5 d 4 5 5 5 4 4 4 4 2 . 
-                    . 2 4 5 5 5 5 d 5 5 5 4 5 4 2 2 
-                    . 2 4 d d 5 5 5 5 5 5 d 4 4 4 2 
-                    2 4 5 5 d 5 5 5 d d d 5 5 5 4 4 
-                    2 4 5 5 4 4 4 d 5 5 d 5 5 5 4 4 
-                    4 4 4 4 . . 2 4 5 5 . . 4 4 4 4 
-                    . . b b b b 2 4 4 2 b b b b . . 
-                    . b d d d d 2 4 4 2 d d d d b . 
-                    b d d b b b 2 4 4 2 b b b d d b 
-                    b d d b b b b b b b b b b d d b 
-                    b b d 1 1 3 1 1 d 1 d 1 1 d b b 
-                    . . b b d d 1 1 3 d d 1 b b . . 
-                    . . 2 2 4 4 4 4 4 4 4 4 2 2 . . 
-                    . . . 2 2 4 4 4 4 4 2 2 2 . . . 
-                    `, SpriteKind.Projectile)
+                if (singlePlayerFlag == 1) {
+                    boomSprite = sprites.create(img`
+                        . . . . 2 2 2 2 2 2 2 2 . . . . 
+                        . . . 2 4 4 4 5 5 4 4 4 2 2 2 . 
+                        . 2 2 5 5 d 4 5 5 5 4 4 4 4 2 . 
+                        . 2 4 5 5 5 5 d 5 5 5 4 5 4 2 2 
+                        . 2 4 d d 5 5 5 5 5 5 d 4 4 4 2 
+                        2 4 5 5 d 5 5 5 d d d 5 5 5 4 4 
+                        2 4 5 5 4 4 4 d 5 5 d 5 5 5 4 4 
+                        4 4 4 4 . . 2 4 5 5 . . 4 4 4 4 
+                        . . b b b b 2 4 4 2 b b b b . . 
+                        . b d d d d 2 4 4 2 d d d d b . 
+                        b d d b b b 2 4 4 2 b b b d d b 
+                        b d d b b b b b b b b b b d d b 
+                        b b d 1 1 3 1 1 d 1 d 1 1 d b b 
+                        . . b b d d 1 1 3 d d 1 b b . . 
+                        . . 2 2 4 4 4 4 4 4 4 4 2 2 . . 
+                        . . . 2 2 4 4 4 4 4 2 2 2 . . . 
+                        `, SpriteKind.cpuit)
+                    cpuLastHitRow = grid.spriteRow(cursor)
+                    cpuLastHitCol = grid.spriteCol(cursor)
+                } else {
+                    boomSprite = sprites.create(img`
+                        . . . . 2 2 2 2 2 2 2 2 . . . . 
+                        . . . 2 4 4 4 5 5 4 4 4 2 2 2 . 
+                        . 2 2 5 5 d 4 5 5 5 4 4 4 4 2 . 
+                        . 2 4 5 5 5 5 d 5 5 5 4 5 4 2 2 
+                        . 2 4 d d 5 5 5 5 5 5 d 4 4 4 2 
+                        2 4 5 5 d 5 5 5 d d d 5 5 5 4 4 
+                        2 4 5 5 4 4 4 d 5 5 d 5 5 5 4 4 
+                        4 4 4 4 . . 2 4 5 5 . . 4 4 4 4 
+                        . . b b b b 2 4 4 2 b b b b . . 
+                        . b d d d d 2 4 4 2 d d d d b . 
+                        b d d b b b 2 4 4 2 b b b d d b 
+                        b d d b b b b b b b b b b d d b 
+                        b b d 1 1 3 1 1 d 1 d 1 1 d b b 
+                        . . b b d d 1 1 3 d d 1 b b . . 
+                        . . 2 2 4 4 4 4 4 4 4 4 2 2 . . 
+                        . . . 2 2 4 4 4 4 4 2 2 2 . . . 
+                        `, SpriteKind.Projectile)
+                }
                 grid.place(boomSprite, grid.getLocation(cursor))
                 hitOrMissPX.push(boomSprite)
                 game.splash("" + hitOrMissPlayer + " HIT!! " + convertToText(isPlayerXWinner(enemyBoats, hitOrMissPX)) + " boats destroyed!")
-                cpuLastHitRow = grid.spriteRow(cursor)
-                cpuLastHitCol = grid.spriteCol(cursor)
                 return 1
             }
         }
@@ -681,6 +732,25 @@ function cpuPlaceBoat2 () {
 function cpuHitOrMiss () {
     game.splash("Row:" + cpuLastHitRow + "Col:" + cpuLastHitCol)
 }
+function searchSEW () {
+    grid.place(cursor, grid.add(tiles.getTileLocation(cpuLastHitCol, cpuLastHitRow), 0, -1))
+    if (cpuLastHitRow > 0 && !(isAttackingTwice(hitOrMissP2))) {
+        return 1
+    }
+    grid.place(cursor, grid.add(tiles.getTileLocation(cpuLastHitCol, cpuLastHitRow), 0, 1))
+    if (cpuLastHitRow < 6 && !(isAttackingTwice(hitOrMissP2))) {
+        return 1
+    }
+    grid.place(cursor, grid.add(tiles.getTileLocation(cpuLastHitCol, cpuLastHitRow), 1, 0))
+    if (cpuLastHitCol < 9 && !(isAttackingTwice(hitOrMissP2))) {
+        return 1
+    }
+    grid.place(cursor, grid.add(tiles.getTileLocation(cpuLastHitCol, cpuLastHitRow), -1, 0))
+    if (cpuLastHitCol > 0 && !(isAttackingTwice(hitOrMissP2))) {
+        return 1
+    }
+    return 0
+}
 function turnBoat (boatNum: number, boatRotateArray: string[]) {
     if (boatRotateArray[boatNum] == "up") {
         boatRotateArray[boatNum] = "sideways"
@@ -703,6 +773,7 @@ function isOverlapping (boatSpriteArrayPX: Sprite[][]) {
 let boomSprite: Sprite = null
 let hitOrMissPlayer = ""
 let iterator = 0
+let mySprite: Sprite = null
 let hitOrMissP1: Sprite[] = []
 let currentBoatBoomCounter = 0
 let killCount = 0
